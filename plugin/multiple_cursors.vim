@@ -85,5 +85,9 @@ endif
 command! -nargs=1 -range=% MultipleCursorsFind
       \ call multiple_cursors#find(<line1>, <line2>, <q-args>)
 
+command! -nargs=1 -range=% MultipleCursorsApply 
+      \ call multiple_cursors#applytoall(<line1>, <line2>, <q-args>)
+	
+
 let &cpo = s:save_cpo
 unlet s:save_cpo

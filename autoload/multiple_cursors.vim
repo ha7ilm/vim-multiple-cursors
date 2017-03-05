@@ -195,6 +195,13 @@ function! multiple_cursors#skip()
   call s:wait_for_user_input('v')
 endfunction
 
+function! multiple_cursors#applytoall(start, end, pattern)
+endfunction
+function! multiple_cursors#unreset()
+	call s:cm.initialize()
+	call s:cm.unreset(0,0)
+	call s:wait_for_user_input('n')
+endfunction
 " Search for pattern between the start and end line number. For each match, add
 " a virtual cursor at the end and start multicursor mode
 " This function is called from a command. User commands in Vim do not support
@@ -400,8 +407,20 @@ function! s:CursorManager.new()
   return obj
 endfunction
 
+
+function! s:CursorManager.unreset(restore_view, restore_setting, ...) dict
+	let self.cursors = self.last_cursors
+	let self.starting_index = self.last_starting_index
+	let self.current_index = self.last_current_index
+    for i in range(self.size())
+      call self.get(i).update_highlight()
+    endfor
+	call winrestview(self.last_winview)
+endfunction
+
 " Clear all cursors and their highlights
 function! s:CursorManager.reset(restore_view, restore_setting, ...) dict
+  let self.last_winview = winsaveview()
   if a:restore_view
     " Return the view back to the beginning
     if !empty(self.saved_winview)
@@ -425,8 +444,11 @@ function! s:CursorManager.reset(restore_view, restore_setting, ...) dict
     endfor
   endif
 
+  let self.last_cursors = self.cursors
   let self.cursors = []
+  let self.last_current_index = self.current_index
   let self.current_index = -1
+  let self.last_starting_index = self.starting_index
   let self.starting_index = -1
   let self.saved_winview = []
   let self.start_from_find = 0
